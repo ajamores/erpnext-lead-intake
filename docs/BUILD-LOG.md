@@ -17,3 +17,12 @@ Written as the work happens, not reconstructed afterwards. Kept in the repo as t
 | Claude Code | `bench init --frappe-branch version-16` **failed** | The command still exited 0, so the failure only showed up when the next step reported `No module named 'frappe'`. The real error: `frappe==16.34.0 depends on Python>=3.14,<3.15` |
 | Claude Code | Read `apps/frappe/pyproject.toml` and `package.json` instead of guessing again | v16 requires **Python >=3.14,<3.15** and **Node >=24**. The image's defaults were correct all along; the pin caused the failure |
 | Claude Code | Wiped the bench and re-ran `bench init` with the container's default runtimes | Running |
+
+## 2026-09-15 — M1: the app and its custom fields
+
+| Who | What | Notes |
+|---|---|---|
+| Claude Code | `bench new-app lead_intake`, installed on the site | Took three attempts: `bench new-app` asks more questions than expected and aborts on EOF rather than taking defaults |
+| Claude Code | Read `apps/erpnext/erpnext/crm/doctype/lead/lead.json` before designing any field | Lead already has `qualification_status` (Unqualified / In Process / Qualified), so we use ERPNext's field instead of inventing one |
+| Armand | Created the Service Interest field by hand through Customize Form | Frappe named it `custom_service_interest`. Since v15, fields added this way get a `custom_` prefix so they can never collide with a field ERPNext adds to Lead later |
+| Claude Code | Declared all four fields in `lead_intake/setup/custom_fields.py`, wired to `after_install` and `after_migrate` | Chose `create_custom_fields()` over exported fixtures: it updates in place, so installing and migrating repeatedly is idempotent. It also repositioned Armand's field into the Qualification tab |

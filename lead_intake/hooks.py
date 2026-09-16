@@ -262,3 +262,11 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+
+# Installation
+# ------------
+# Custom fields are declared in code so a fresh install reproduces them.
+# create_custom_fields() updates in place, so running this repeatedly is safe.
+
+after_install = "lead_intake.setup.custom_fields.setup_custom_fields"
+after_migrate = "lead_intake.setup.custom_fields.setup_custom_fields"
