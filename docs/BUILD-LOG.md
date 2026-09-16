@@ -56,3 +56,12 @@ Written as the work happens, not reconstructed afterwards. Kept in the repo as t
 | Claude Code | `Lead Pipeline Summary`, a Script Report grouped by service | One aggregate query. Filters are bound as parameters, never formatted into the SQL string |
 | Claude Code | Added a "% Triaged by Claude" column | Makes visible how much of the pipeline the model actually touched, next to how much fell back to keyword rules |
 | Testing | Ran it against the leads created so far | Correct counts by service and qualification, including an "(Unclassified)" row for the Lead created before the triage hook existed |
+
+## 2026-09-15 — M5: sample data and tests
+
+| Who | What | Notes |
+|---|---|---|
+| Claude Code | `scripts/send_sample_enquiries.py` — 15 enquiries from fictional Southern Ontario businesses | Reads URL and token from the environment. Includes one deliberate retry of an earlier enquiry ID and one prompt-injection attempt |
+| Claude Code | Nine tests, Claude mocked throughout | Deterministic, free to run, and they pass with no API key present |
+| Testing | `bench run-tests --app lead_intake` | 9 passed. Also surfaced a deprecation: `frappe.enqueue(job_name=...)` is replaced by `job_id` in v17, now fixed |
+| Testing | Ran the sample script against a cleared site | 14 created, 1 duplicate, 0 failed. All 14 triaged by Claude; the injection attempt classified Other / Unqualified and summarised as a prompt-injection attempt |

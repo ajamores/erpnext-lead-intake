@@ -63,7 +63,7 @@ def enqueue_triage(doc, method=None):
 	frappe.enqueue(
 		"lead_intake.triage.triage_lead",
 		queue="short",
-		job_name=f"triage:{doc.name}",
+		job_id=f"triage:{doc.name}",
 		enqueue_after_commit=True,
 		lead=doc.name,
 	)
