@@ -26,3 +26,12 @@ Written as the work happens, not reconstructed afterwards. Kept in the repo as t
 | Claude Code | Read `apps/erpnext/erpnext/crm/doctype/lead/lead.json` before designing any field | Lead already has `qualification_status` (Unqualified / In Process / Qualified), so we use ERPNext's field instead of inventing one |
 | Armand | Created the Service Interest field by hand through Customize Form | Frappe named it `custom_service_interest`. Since v15, fields added this way get a `custom_` prefix so they can never collide with a field ERPNext adds to Lead later |
 | Claude Code | Declared all four fields in `lead_intake/setup/custom_fields.py`, wired to `after_install` and `after_migrate` | Chose `create_custom_fields()` over exported fixtures: it updates in place, so installing and migrating repeatedly is idempotent. It also repositioned Armand's field into the Qualification tab |
+
+## 2026-09-15 — M2: webhook intake
+
+| Who | What | Notes |
+|---|---|---|
+| Claude Code | `lead_intake/api.py` — `intake_enquiry`, POST only, token auth | Validates required fields and the email address, caps every field length, and returns a plain JSON `{"error": ...}` with a 400 rather than Frappe's default 417 |
+| Claude Code | Idempotency in two layers | A lookup on `custom_external_enquiry_id` handles the ordinary case; the unique index plus a `UniqueValidationError` catch handles two identical enquiries arriving at once. The lookup alone would not be safe under concurrency |
+| Claude Code | `lead_intake/setup/integration_user.py` — a least-privilege role and user | The role can create and read Leads and nothing else. A token leaked from a website's backend then cannot reach customers, invoices or accounts |
+| Armand | Tested all five cases against the running site | Valid enquiry 200, repeat 200 with `duplicate: true` and nothing created, missing fields 400 naming them, bad email 400, no credentials 403 |
