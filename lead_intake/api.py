@@ -91,6 +91,18 @@ def intake_enquiry(
 
 	try:
 		lead.insert()
+	except frappe.DuplicateEntryError:
+		# ERPNext's Lead refuses a second Lead with an email address already on
+		# file. A returning enquirer is a normal event, not a server error, so
+		# the caller gets a 409 naming the Lead that already holds the address
+		# rather than a traceback. Attaching the new enquiry to that Lead as a
+		# note would be the next step; see README, Known limitations.
+		frappe.db.rollback()
+		owner = frappe.db.get_value("Lead", {"email_id": payload["email"]}, "name")
+		return _error(
+			_("A Lead already exists for {0}: {1}").format(payload["email"], owner),
+			status=409,
+		)
 	except frappe.UniqueValidationError:
 		# Two identical enquiries arrived at once. The database settled it;
 		# return whichever Lead won rather than failing the caller.

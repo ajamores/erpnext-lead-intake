@@ -270,3 +270,14 @@ app_license = "mit"
 
 after_install = "lead_intake.setup.custom_fields.setup_custom_fields"
 after_migrate = "lead_intake.setup.custom_fields.setup_custom_fields"
+
+# Document Events
+# ---------------
+# The webhook must not wait on a model, so intake only creates the Lead and
+# this hook queues the triage to run in a background worker.
+
+doc_events = {
+	"Lead": {
+		"after_insert": "lead_intake.triage.enqueue_triage",
+	}
+}
